@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tính tiền</title>
+  <style>
+     #calculator {
+      background-color: #fff;
+      border-radius: 8px;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+   
+      text-align: center;
+    }
+
+    h1 {
+      color: #333;
+    }
+
+    label {
+      display: block;
+      margin-bottom: 8px;
+    }
+
+    input {
+      width: calc(100% - 18px);
+      padding: 8px;
+      margin-bottom: 16px;
+      box-sizing: border-box;
+    }
+
+    button {
+      background-color: #4caf50;
+      color: #fff;
+      border: none;
+      padding: 10px 20px;
+      text-align: center;
+      text-decoration: none;
+      display: inline-block;
+      font-size: 16px;
+      margin: 4px 2px;
+      cursor: pointer;
+      border-radius: 4px;
+      width: calc(100% - 18px);
+    }
+
+    button:hover {
+      background-color: #45a049;
+    }
+    table {
+      border-collapse: collapse;
+      width: 100%;
+      margin: 30px 0px;
+    }
+    th, td {
+      border: 1px solid #ddd;
+      padding: 8px;
+      text-align: left;
+    }
+  </style>
+</head>
+<body>
+<div id="calculator">
+    <h1>Tính Tiền</h1>
+
+    <label for="start">Chọn ngày bắt đầu:</label>
+    <input type="date" id="start" name="start">
+
+    <label for="end">Chọn ngày kết thúc:</label>
+    <input type="date" id="end" name="end">
+
+    <label for="mealPrice">Giá Tiền Mỗi Suất (k):</label>
+    <input type="number" id="mealPrice" name="mealPrice" value="25">
+
+    <button onclick="generateInputs()">1. Tạo Input</button>
+    <button onclick="calculate()">2. Tính Tiền</button>
+    <button onclick="copyTable()">3. Copy Bảng</button>
+<br>
+    <table id="result">
+      <!-- Kết quả sẽ được hiển thị ở đây -->
+    </table>
+  </div>
+  <script>
+    function generateInputs() {
+      const startDate = new Date(document.getElementById("start").value);
+      const endDate = new Date(document.getElementById("end").value);
+      const days = Math.floor((endDate - startDate) / (24 * 60 * 60 * 1000)) + 1;
+
+      let inputsHtml = '';
+      for (let i = 0; i < days; i++) {
+        const currentDate = new Date(startDate);
+        currentDate.setDate(startDate.getDate() + i);
+
+        const formattedDate = currentDate.toLocaleDateString();
+        const dayOfWeek = getDayOfWeek(currentDate.getDay());
+
+        inputsHtml += `
+          <tr>
+            <td>${formattedDate} (${dayOfWeek}):</td>
+            <td>
+              <label for="meals_${formattedDate}">Số Suất</label>
+              <input type="number" placeholder="Meals" id="meals_${formattedDate}">
+            </td>
+            <td></td>
+          </tr>`;
+      }
+
+      document.getElementById("result").innerHTML = inputsHtml;
+    }
+
+    function calculate() {
+  const startDate = new Date(document.getElementById("start").value);
+  const endDate = new Date(document.getElementById("end").value);
+  const days = Math.floor((endDate - startDate) / (24 * 60 * 60 * 1000)) + 1;
+  const pricePerMeal = parseFloat(document.getElementById("mealPrice").value) || 0;
+  let total = 0;
+  let totalMeals = 0; // Thêm biến để tính tổng số suất ăn
+
+  let resultHtml = `<tr><th>Ngày</th><th>Số Suất</th><th>Tổng Tiền</th></tr>`;
+
+  for (let i = 0; i < days; i++) {
+    const currentDate = new Date(startDate);
+    currentDate.setDate(startDate.getDate() + i);
+
+    const formattedDate = currentDate.toLocaleDateString();
+    const dayOfWeek = getDayOfWeek(currentDate.getDay());
+
+    const meals = parseInt(document.getElementById(`meals_${formattedDate}`).value) || 0;
+    totalMeals += meals; // Cộng vào tổng số suất ăn
+
+    const dailyTotal = meals * pricePerMeal;
+    total += dailyTotal;
+
+    resultHtml += `<tr><td>${formattedDate} (${dayOfWeek}):</td><td>${meals}</td><td>${dailyTotal}k</td></tr>`;
+  }
+
+  resultHtml += `<tr><td >Tổng tháng </td><td>${totalMeals} suất</td><td>${total}k</td></tr>`;
+  document.getElementById("result").innerHTML = resultHtml;
+}
+
+
+    function copyTable() {
+      const resultTable = document.getElementById("result");
+      const range = document.createRange();
+      range.selectNode(resultTable);
+      window.getSelection().removeAllRanges();
+      window.getSelection().addRange(range);
+      document.execCommand("copy");
+      window.getSelection().removeAllRanges();
+      alert("Bảng đã được sao chép!");
+    }
+
+  
+    function getDayOfWeek(dayIndex) {
+      const daysOfWeek = ["Chủ nhật", "Thứ 2", "Thứ 3", "Thứ 4", "Thứ 5", "Thứ 6", "Thứ 7"];
+      return daysOfWeek[dayIndex];
+    }
+  </script>
+
+</body>
+</html>
